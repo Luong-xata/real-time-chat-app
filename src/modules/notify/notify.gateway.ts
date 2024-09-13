@@ -8,17 +8,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-function generateRandomNumberEverySecond() {
-  let randomNumber = 0;
-
-  setInterval(() => {
-    randomNumber = Math.floor(Math.random() * 100);
-    console.log(`Số ngẫu nhiên: ${randomNumber}`);
-  }, 1000);
-
-  return () => randomNumber;
-}
-
 @WebSocketGateway({
   cors: {
     origin: '*',
