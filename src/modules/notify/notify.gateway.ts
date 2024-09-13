@@ -41,18 +41,23 @@ export class NotifyGateway implements OnModuleInit {
   }
 
   @SubscribeMessage('join-room')
-  joinRoom(@MessageBody() roomId: string, @ConnectedSocket() client: Socket) {
-    client.join(roomId);
-    console.log(`client ${client.id} joined!`);
+  joinRoom(
+    @MessageBody() payload: { roomId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(payload.roomId);
+    client.emit('message', `You joined room: ${payload.roomId}`);
   }
 
   @SubscribeMessage('send-message')
   sendMessage(
-    @MessageBody() payload: { roomId: string; message: string },
+    @MessageBody()
+    payload: { roomId: string; message: string; userName: string },
     @ConnectedSocket() client: Socket,
   ) {
     this.server.to(payload.roomId).emit('receive-message', {
       clientId: client.id,
+      userName: payload.userName,
       message: payload.message,
     });
   }

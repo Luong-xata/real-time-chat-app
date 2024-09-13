@@ -1,4 +1,4 @@
-<!doctype html>
+<!-- <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -16,6 +16,65 @@
 
       socket.on('randomNumber', (number) => {
         document.getElementById('random-number').textContent = number; // Hiển thị số ngẫu nhiên
+      });
+    </script>
+  </body>
+</html> -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chat Room</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  </head>
+  <body>
+    <div id="chat">
+      <input
+        id="roomInput"
+        placeholder="Enter room name"
+        style="width: 300px; height: 30px"
+      />
+      <button onclick="joinRoom()">Join Room</button>
+      <br />
+      <br />
+      <input
+        id="userName"
+        placeholder="Enter user name"
+        style="width: 300px; height: 30px"
+      />
+
+      <br />
+      <br />=================================<br />
+      <input
+        id="messageInput"
+        placeholder="Enter message"
+        style="width: 300px; height: 30px"
+      />
+      <button onclick="sendMessage()">Send Message</button>
+      <div id="messages"></div>
+    </div>
+
+    <script>
+      const socket = io('http://localhost:3000');
+      function joinRoom() {
+        const roomId = document.getElementById('roomInput').value;
+        socket.emit('join-room', { roomId });
+      }
+
+      function sendMessage() {
+        const roomId = document.getElementById('roomInput').value;
+        const message = document.getElementById('messageInput').value;
+        const userName = document.getElementById('userName').value;
+        socket.emit('send-message', { roomId, message, userName });
+      }
+
+      // Lắng nghe sự kiện 'message' từ server
+      socket.on('receive-message', (data) => {
+        const messageContainer = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.textContent = `${data.userName || 'Server'}: ${data.message}`;
+        messageContainer.appendChild(messageElement);
       });
     </script>
   </body>
