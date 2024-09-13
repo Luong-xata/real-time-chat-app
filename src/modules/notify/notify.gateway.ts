@@ -1,5 +1,6 @@
 import { OnModuleInit } from '@nestjs/common';
 import {
+  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -39,21 +40,20 @@ export class NotifyGateway implements OnModuleInit {
     });
   }
 
-  handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
-    this.startRandomNumberGeneration();
+  @SubscribeMessage('join-room')
+  joinRoom(@MessageBody() roomId: string, @ConnectedSocket() client: Socket) {
+    client.join(roomId);
+    console.log(`client ${client.id} joined!`);
   }
 
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: string): string {
-    this.server.emit('res', data);
-    return data;
-  }
-
-  private startRandomNumberGeneration() {
-    setInterval(() => {
-      const randomNumber = Math.floor(Math.random() * 1000000);
-      this.server.to('room1').emit('randomNumber', randomNumber);
-    }, 500);
+  @SubscribeMessage('send-message')
+  sendMessage(
+    @MessageBody() payload: { roomId: string; message: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.server.to(payload.roomId).emit('receive-message', {
+      clientId: client.id,
+      message: payload.message,
+    });
   }
 }
